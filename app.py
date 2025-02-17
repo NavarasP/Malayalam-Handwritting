@@ -59,7 +59,7 @@ def predict_alphabets(image_path):
     ens = ["alexnet_non_pretrained_bs32.pkl", "resnet_18_non-pre_trained.pkl"]
     ens_test_preds = []
     for mod in ens:
-        learn = load_learner(path='.', file=mod, weights_only=False)
+        learn = load_learner(path='.', file=mod)
 
         img = open_image(image_path)
         pred_class, pred_idx, outputs = learn.predict(img)
