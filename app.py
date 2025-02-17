@@ -25,15 +25,8 @@ import subprocess
 
 torch.nn.Module.dump_patches = True
 
-import os
 
-# Make sure the upload folder exists
-# UPLOAD_FOLDER = '/root/Malayalam-Handwritting/uploads'
-# if not os.path.exists(UPLOAD_FOLDER):
-#     os.makedirs(UPLOAD_FOLDER)
-
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
+UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER_PNG = os.path.join(os.getcwd(),'output/png')
 OUTPUT_FOLDER_PNG_x64 = os.path.join(os.getcwd(),'output/png_x64')
 OUTPUT_FOLDER_SVG = os.path.join(os.getcwd(),'output/svg')
