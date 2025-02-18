@@ -360,6 +360,84 @@ def upload_file():
     return render_template('result.html', messages={'string': sentence, 'image': str(filename), 'font': str(filename.split(".")[0])+'.ttf', 'possible_words': words_list})
 
 
+@app.route('/api/upload', methods=['POST'])
+def api_upload():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file and allowed_file(file.filename):
+        return process_file(file, api=True)
+    return jsonify({"error": "Invalid file type"}), 400
+
+def process_file(file, api=False):
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
+    
+    os.makedirs(os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0]), exist_ok=True)
+    os.makedirs(os.path.join(OUTPUT_FOLDER_SVG, filename.split(".")[0]), exist_ok=True)
+    os.makedirs(os.path.join(OUTPUT_FOLDER_PNG_x64, filename.split(".")[0]), exist_ok=True)
+    os.makedirs(os.path.join(OUTPUT_FOLDER_METADATA, filename.split(".")[0]), exist_ok=True)
+    os.makedirs(os.path.join(OUTPUT_FOLDER_FONT, filename.split(".")[0]), exist_ok=True)
+    
+    img = cv2.cvtColor(cv2.imread(filepath), cv2.COLOR_BGR2RGB)
+    x, wordNo = img_to_seg(img, filename)
+    
+    if x == "1":
+        metadata = process_image(filename, wordNo)
+        
+        if api:
+            return jsonify({
+                "string": metadata["sentence"],
+                "image": filename,
+                "font": filename.split(".")[0] + ".ttf",
+                "possible_words": metadata["words_list"]
+            })
+        
+        return render_template('result.html', messages={
+            'string': metadata["sentence"],
+            'image': filename,
+            'font': filename.split(".")[0] + '.ttf',
+            'possible_words': metadata["words_list"]
+        })
+    
+    if api:
+        return jsonify({"error": "Processing failed"}), 500
+    return "Processing failed", 500
+
+def process_image(filename, wordNo):
+    metadata = {
+        "props": {"ascent": 800, "descent": 200, "em": 1000, "family": "Example"},
+        "input": "../svg/" + filename.split(".")[0],
+        "output": ["../fonts/" + filename.split(".")[0] + ".ttf"],
+        "glyphs": {}
+    }
+    alpha = {}
+    words_list = []
+    sentence = ""
+    
+    for i in range(wordNo):
+        alpha[str(i)] = {}
+    
+    for f in os.listdir(os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0])):
+        character = predict_alphabets(os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0], f))
+        alpha[str(f.split("_")[0])][str(f.split("_")[1].split(".")[0])] = character
+        
+    for word in range(len(alpha)):
+        string = "".join([alpha[str(word)][str(ch)] for ch in alpha[str(word)]])
+        words_list.append(spell_correct.correction(string))
+        sentence += string + " "
+    
+    metadata["sentence"] = sentence.strip()
+    metadata["words_list"] = words_list
+    
+    return metadata
+
+
+
+
 @app.route('/upload/<filename>')
 def uploads(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
