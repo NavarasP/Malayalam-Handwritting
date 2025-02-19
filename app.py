@@ -139,6 +139,7 @@ def get_profile():
         return jsonify({"success": False, "message": "User ID is required"}), 400
 
     user = db.session.get(User, user_id)
+    print(user.username)
     if not user:
         return jsonify({"success": False, "message": "User not found"}), 404
 
