@@ -92,41 +92,52 @@ def logout():
 
 @app.route("/api/save_note", methods=["POST"])
 def save_note():
-    # if "user_id" not in session:
-    #     return jsonify({"success": False, "message": "Unauthorized"}), 401
-
     data = request.get_json()
-    content = data.get("content")
+    user_id = data.get("user_id")  # Get user ID from request
 
+    if not user_id:
+        return jsonify({"success": False, "message": "User ID is required"}), 400
+
+    content = data.get("content")
     if not content:
         return jsonify({"success": False, "message": "Note content is required"}), 400
 
-    new_note = Note(user_id=session["user_id"], content=content)
+    new_note = Note(user_id=user_id, content=content)
     db.session.add(new_note)
     db.session.commit()
 
     return jsonify({"success": True, "message": "Note saved successfully"})
 
 
+
 @app.route("/api/get_notes", methods=["GET"])
 def get_notes():
-    if "user_id" not in session:
-        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    user_id = request.args.get("user_id")  # Get user ID from query params
 
-    notes = Note.query.filter_by(user_id=session["user_id"]).all()
-    return jsonify({"success": True, "notes": [{"id": n.id, "content": n.content, "created_at": n.created_at} for n in notes]})
+    if not user_id:
+        return jsonify({"success": False, "message": "User ID is required"}), 400
+
+    notes = Note.query.filter_by(user_id=user_id).all()
+    return jsonify({
+        "success": True,
+        "notes": [{"id": n.id, "content": n.content, "created_at": n.created_at} for n in notes]
+    })
+
 
 
 @app.route("/api/get_profile", methods=["GET"])
 def get_profile():
-    if "user_id" not in session:
-        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    user_id = request.args.get("user_id")  # Get user ID from query params
 
-    user = User.query.get(session["user_id"])
+    if not user_id:
+        return jsonify({"success": False, "message": "User ID is required"}), 400
+
+    user = User.query.get(user_id)
     if not user:
         return jsonify({"success": False, "message": "User not found"}), 404
 
     return jsonify({"success": True, "profile": {"username": user.username, "email": user.email}})
+
 
 
 
