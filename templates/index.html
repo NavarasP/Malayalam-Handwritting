@@ -53,7 +53,7 @@
             document.getElementById("prediction").innerText = "Processing...";
             
             try {
-                const response = await fetch("/api/predict_text", {
+                const response = await fetch("/", {
                     method: "POST",
                     body: formData
                 });
