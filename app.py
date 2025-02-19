@@ -78,9 +78,14 @@ def login():
 
     if user and bcrypt.check_password_hash(user.password, password):
         session["user_id"] = user.id
-        return jsonify({"success": True, "message": "Login successful"})
+        return jsonify({
+            "success": True, 
+            "message": "Login successful", 
+            "user_id": user.id  # Return user_id
+        })
     
     return jsonify({"success": False, "message": "Invalid credentials"}), 401
+
 
 
 @app.route("/api/logout", methods=["GET"])
@@ -130,23 +135,6 @@ def get_profile():
     return jsonify({"success": True, "profile": {"username": user.username, "email": user.email}})
 
 
-@app.route("/api/create_profile", methods=["POST"])
-def create_profile():
-    data = request.get_json()
-    username = data.get("username")
-    email = data.get("email")
-    password = data.get("password")
-
-    if User.query.filter_by(username=username).first():
-        return jsonify({"success": False, "message": "Username already exists"}), 400
-
-    hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
-
-    new_user = User(username=username, email=email, password=hashed_password)
-    db.session.add(new_user)
-    db.session.commit()
-
-    return jsonify({"success": True, "message": "Profile created successfully"})
 
 
 ### IMAGE PROCESSING ###
