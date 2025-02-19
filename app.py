@@ -157,9 +157,9 @@ def predict_text(image_path):
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
-            {"role": "system", "content": "Read the content in the image"},
+            {"role": "system", "content": "You are an expert in reading and extracting Malayalam text from images."},
             {"role": "user", "content": [
-                {"type": "text", "text": "whats written their in image strictly in malayalam?"},
+                {"type": "text", "text": "Extract and return only the Malayalam text from this image. Do not provide any explanation, translation, or additional details. Strictly output only the Malayalam text as it appears in the image."},
                 {"type": "image_url", "image_url": {
                     "url": f"data:image/png;base64,{base64_image}"}
                 }
@@ -168,6 +168,8 @@ def predict_text(image_path):
         temperature=0.0,
     )
     return response.choices[0].message.content
+    
+
 
 
 @app.route("/api/predict_text", methods=["POST"])
