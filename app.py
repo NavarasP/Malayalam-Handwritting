@@ -92,8 +92,8 @@ def logout():
 
 @app.route("/api/save_note", methods=["POST"])
 def save_note():
-    if "user_id" not in session:
-        return jsonify({"success": False, "message": "Unauthorized"}), 401
+    # if "user_id" not in session:
+    #     return jsonify({"success": False, "message": "Unauthorized"}), 401
 
     data = request.get_json()
     content = data.get("content")
