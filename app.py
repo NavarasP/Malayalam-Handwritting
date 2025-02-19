@@ -93,7 +93,7 @@ def logout():
 @app.route("/api/save_note", methods=["POST"])
 def save_note():
     data = request.get_json()
-    user_id = int(data.get("user_id") ) # Get user ID from request
+    user_id = data.get("user_id") # Get user ID from request
 
     if not user_id:
         return jsonify({"success": False, "message": "User ID is required"}), 400
