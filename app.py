@@ -161,10 +161,10 @@ def predict_text(image_path):
 
 @app.route("/api/predict_text", methods=["POST"])
 def api_predict_text():
-    if "image" not in request.files:
+    if "file" not in request.files:
         return jsonify({"success": False, "message": "No file uploaded"}), 400
 
-    file = request.files["image"]
+    file = request.files["file"]
     if file.filename == "":
         return jsonify({"success": False, "message": "No file selected"}), 400
 
@@ -176,5 +176,8 @@ def api_predict_text():
     return jsonify({"success": True, "text": predictions})
 
 ### RUN FLASK APP ###
+
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
