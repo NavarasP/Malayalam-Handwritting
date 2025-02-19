@@ -178,25 +178,24 @@ def api_predict_text():
 ### RUN FLASK APP ###
 
 
+
 @app.route("/", methods=["GET", "POST"])
 def index():
-
     if request.method == "POST":
-        if "image" not in request.files:
-            return render_template("index.html", prediction="No file uploaded")
+        if "image" not in request.files:  # 🔴 Check if "image" key is missing
+            return jsonify({"success": False, "message": "No file uploaded"})
 
         file = request.files["image"]
-        if file.filename == "":
-            return render_template("index.html", prediction="No file selected")
+        if file.filename == "":  # 🔴 Check if file is empty
+            return jsonify({"success": False, "message": "No file selected"})
 
         filepath = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(filepath)
 
+        predictions = predict_text(filepath)  # Call your OCR function
+        return jsonify({"success": True, "text": predictions})
 
-        predictions = predict_text(filepath)
-        return render_template("index.html", uploaded_image=filepath, predictions=predictions)
-
-    return render_template("index.html", prediction="")
+    return render_template("index.html")
 
 
 

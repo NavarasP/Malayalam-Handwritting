@@ -31,38 +31,41 @@
 <body>
     <div class="container">
         <h2>Upload an Image for OCR</h2>
-        <form id="uploadForm" enctype="multipart/form-data">
-            <input type="file" id="imageInput" accept="image/*" required>
+        <form id="uploadForm" action="/" method="POST" enctype="multipart/form-data">
+            <input type="file" id="imageInput" name="image" accept="image/*" required>
             <button type="submit">Upload</button>
-        </form>
+        </form>        
         <p id="prediction"></p>
         <img id="preview" style="display: none;">
     </div>
 
     <script>
-        document.getElementById("uploadForm").addEventListener("submit", async function(event) {
-            event.preventDefault();
-            const fileInput = document.getElementById("imageInput").files[0];
-            if (!fileInput) return;
-            
-            const formData = new FormData();
-            formData.append("image", fileInput);
-            
-            document.getElementById("preview").src = URL.createObjectURL(fileInput);
-            document.getElementById("preview").style.display = "block";
-            document.getElementById("prediction").innerText = "Processing...";
-            
-            try {
-                const response = await fetch("/", {
-                    method: "POST",
-                    body: formData
-                });
-                const result = await response.json();
-                document.getElementById("prediction").innerText = result.success ? result.text : "Error: " + result.message;
-            } catch (error) {
-                document.getElementById("prediction").innerText = "Failed to process image.";
-            }
-        });
+document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const fileInput = document.getElementById("imageInput").files[0];
+    if (!fileInput) return;
+
+    const formData = new FormData();
+    formData.append("image", fileInput);
+
+    document.getElementById("preview").src = URL.createObjectURL(fileInput);
+    document.getElementById("preview").style.display = "block";
+    document.getElementById("prediction").innerText = "Processing...";
+
+    try {
+        const response = await fetch("/", { method: "POST", body: formData });
+        const result = await response.json(); // 🔴 Expect JSON, not HTML
+
+        if (result.success) {
+            document.getElementById("prediction").innerText = result.text;
+        } else {
+            document.getElementById("prediction").innerText = "Error: " + result.message;
+        }
+    } catch (error) {
+        document.getElementById("prediction").innerText = "Failed to process image.";
+    }
+});
+
     </script>
 </body>
 </html>
