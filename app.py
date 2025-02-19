@@ -112,22 +112,22 @@ def save_note():
 
 @app.route("/api/get_notes", methods=["GET"])
 def get_notes():
-    user_id = request.args.get("user_id")  # Get user ID from query params
+    user_id = request.args.get("user_id")
 
     if not user_id:
         return jsonify({"success": False, "message": "User ID is required"}), 400
 
     try:
-        user_id = int(user_id)  # ✅ Convert to integer
+        user_id = int(user_id)
     except ValueError:
         return jsonify({"success": False, "message": "Invalid User ID"}), 400
 
     notes = Note.query.filter_by(user_id=user_id).all()
+    note_list = [{"id": n.id, "content": n.content, "created_at": n.created_at.isoformat()} for n in notes]
 
-    return jsonify({
-        "success": True,
-        "notes": [{"id": n.id, "content": n.content, "created_at": n.created_at} for n in notes]
-    })
+    return jsonify({"success": True, "notes": note_list})
+
+
 
 
 
@@ -159,7 +159,7 @@ def predict_text(image_path):
         messages=[
             {"role": "system", "content": "Read the content in the image"},
             {"role": "user", "content": [
-                {"type": "text", "text": "What's written in the image?"},
+                {"type": "text", "text": "whats written their in image strictly in malayalam?"},
                 {"type": "image_url", "image_url": {
                     "url": f"data:image/png;base64,{base64_image}"}
                 }
