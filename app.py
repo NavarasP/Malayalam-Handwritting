@@ -172,23 +172,23 @@ def api_predict_text():
 
 
 
-# @app.route("/", methods=["GET", "POST"])
-# def index():
-#     if request.method == "POST":
-#         if "image" not in request.files: 
-#             return jsonify({"success": False, "message": "No file uploaded"})
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+        if "image" not in request.files: 
+            return jsonify({"success": False, "message": "No file uploaded"})
 
-#         file = request.files["image"]
-#         if file.filename == "":  
-#             return jsonify({"success": False, "message": "No file selected"})
+        file = request.files["image"]
+        if file.filename == "":  
+            return jsonify({"success": False, "message": "No file selected"})
 
-#         filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-#         file.save(filepath)
+        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(filepath)
 
-#         predictions = predict_text(filepath)  
-#         return jsonify({"success": True, "text": predictions})
+        predictions = predict_text(filepath)  
+        return jsonify({"success": True, "text": predictions})
 
-#     return render_template("index.html")
+    return render_template("index.html")
 
 
 
