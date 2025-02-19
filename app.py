@@ -26,11 +26,9 @@ db = SQLAlchemy(app)
 MODEL = "gpt-4o"
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# File storage
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-### DATABASE MODELS ###
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -43,11 +41,9 @@ class Note(db.Model):
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-# Initialize Database
 with app.app_context():
     db.create_all()
 
-### AUTHENTICATION ###
 
 @app.route("/api/signup", methods=["POST"])
 def signup():
@@ -81,7 +77,7 @@ def login():
         return jsonify({
             "success": True, 
             "message": "Login successful", 
-            "user_id": user.id  # Return user_id
+            "user_id": user.id 
         })
     
     return jsonify({"success": False, "message": "Invalid credentials"}), 401
@@ -93,7 +89,6 @@ def logout():
     session.pop("user_id", None)
     return jsonify({"success": True, "message": "Logged out successfully"})
 
-### NOTES MANAGEMENT ###
 
 @app.route("/api/save_note", methods=["POST"])
 def save_note():
@@ -121,7 +116,6 @@ def get_notes():
     notes = Note.query.filter_by(user_id=session["user_id"]).all()
     return jsonify({"success": True, "notes": [{"id": n.id, "content": n.content, "created_at": n.created_at} for n in notes]})
 
-### PROFILE MANAGEMENT ###
 
 @app.route("/api/get_profile", methods=["GET"])
 def get_profile():
@@ -137,7 +131,6 @@ def get_profile():
 
 
 
-### IMAGE PROCESSING ###
 
 def predict_text(image_path):
     with open(image_path, "rb") as image_file:
@@ -175,27 +168,27 @@ def api_predict_text():
     
     return jsonify({"success": True, "text": predictions})
 
-### RUN FLASK APP ###
 
 
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "POST":
-        if "image" not in request.files:  # 🔴 Check if "image" key is missing
-            return jsonify({"success": False, "message": "No file uploaded"})
 
-        file = request.files["image"]
-        if file.filename == "":  # 🔴 Check if file is empty
-            return jsonify({"success": False, "message": "No file selected"})
+# @app.route("/", methods=["GET", "POST"])
+# def index():
+#     if request.method == "POST":
+#         if "image" not in request.files: 
+#             return jsonify({"success": False, "message": "No file uploaded"})
 
-        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(filepath)
+#         file = request.files["image"]
+#         if file.filename == "":  
+#             return jsonify({"success": False, "message": "No file selected"})
 
-        predictions = predict_text(filepath)  # Call your OCR function
-        return jsonify({"success": True, "text": predictions})
+#         filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+#         file.save(filepath)
 
-    return render_template("index.html")
+#         predictions = predict_text(filepath)  
+#         return jsonify({"success": True, "text": predictions})
+
+#     return render_template("index.html")
 
 
 
