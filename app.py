@@ -117,7 +117,13 @@ def get_notes():
     if not user_id:
         return jsonify({"success": False, "message": "User ID is required"}), 400
 
+    try:
+        user_id = int(user_id)  # ✅ Convert to integer
+    except ValueError:
+        return jsonify({"success": False, "message": "Invalid User ID"}), 400
+
     notes = Note.query.filter_by(user_id=user_id).all()
+
     return jsonify({
         "success": True,
         "notes": [{"id": n.id, "content": n.content, "created_at": n.created_at} for n in notes]
