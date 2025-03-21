@@ -153,7 +153,7 @@ def predict_text(image_path):
         messages = [
     {"role": "system", "content": "You are an expert in reading and extracting Malayalam text from images."},
     {"role": "user", "content": [
-        {"type": "text", "text": "Extract and return only the Malayalam text from this image. Do not provide any explanation, translation, or additional details. Strictly output only the Malayalam text as it appears in the image. If the image contains multiple paragraphs, preserve them as separate paragraphs in the output."},
+        {"type": "text", "text": "Extract and return only the Malayalam text from this image. Do not provide any explanation, translation, or additional details. Strictly output only the Malayalam text as it appears in the image."},
         {"type": "image_url", "image_url": {
             "url": f"data:image/png;base64,{base64_image}"
         }}
