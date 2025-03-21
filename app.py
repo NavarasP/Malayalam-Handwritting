@@ -7,22 +7,19 @@ import os
 import base64
 from openai import OpenAI
 
-# Load environment variables
+
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS
-bcrypt = Bcrypt(app)  # For password hashing
+CORS(app)  
+bcrypt = Bcrypt(app)  
 
-# Configurations
 app.secret_key = os.getenv("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL") 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Initialize database
 db = SQLAlchemy(app)
 
-# OpenAI API Setup
 MODEL = "gpt-4o"
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -93,7 +90,7 @@ def logout():
 @app.route("/api/save_note", methods=["POST"])
 def save_note():
     data = request.get_json()
-    user_id = data.get("user_id") # Get user ID from request
+    user_id = data.get("user_id") 
 
     if not user_id:
         return jsonify({"success": False, "message": "User ID is required"}), 400
@@ -133,7 +130,7 @@ def get_notes():
 
 @app.route("/api/get_profile", methods=["GET"])
 def get_profile():
-    user_id = request.args.get("user_id")  # Get user ID from query params
+    user_id = request.args.get("user_id")  
 
     if not user_id:
         return jsonify({"success": False, "message": "User ID is required"}), 400
@@ -147,28 +144,24 @@ def get_profile():
 
 
 
-
-
-
 def predict_text(image_path):
     with open(image_path, "rb") as image_file:
         base64_image = base64.b64encode(image_file.read()).decode("utf-8")
 
     response = client.chat.completions.create(
         model=MODEL,
-        messages=[
-            {"role": "system", "content": "You are an expert in reading and extracting Malayalam text from images."},
-            {"role": "user", "content": [
-                {"type": "text", "text": "Extract and return only the Malayalam text from this image. Do not provide any explanation, translation, or additional details. Strictly output only the Malayalam text as it appears in the image."},
-                {"type": "image_url", "image_url": {
-                    "url": f"data:image/png;base64,{base64_image}"}
-                }
-            ]}
-        ],
+        messages = [
+    {"role": "system", "content": "You are an expert in reading and extracting Malayalam text from images."},
+    {"role": "user", "content": [
+        {"type": "text", "text": "Extract and return only the Malayalam text from this image. Do not provide any explanation, translation, or additional details. Strictly output only the Malayalam text as it appears in the image. If the image contains multiple paragraphs, preserve them as separate paragraphs in the output."},
+        {"type": "image_url", "image_url": {
+            "url": f"data:image/png;base64,{base64_image}"
+        }}
+    ]}
+],
         temperature=0.0,
     )
     return response.choices[0].message.content
-    
 
 
 
@@ -191,7 +184,6 @@ def api_predict_text():
 
 
 
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -209,7 +201,6 @@ def index():
         return jsonify({"success": True, "text": predictions})
 
     return render_template("index.html")
-
 
 
 
