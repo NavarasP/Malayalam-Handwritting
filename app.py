@@ -115,6 +115,7 @@ def login():
         return jsonify({
             "success": True, 
             "message": "Login successful", 
+            "user_id": user.id,
             "user": {
                 "id": user.id,
                 "username": user.username,
