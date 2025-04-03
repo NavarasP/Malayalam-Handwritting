@@ -44,40 +44,90 @@ with app.app_context():
 
 @app.route("/api/signup", methods=["POST"])
 def signup():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
-    email = data.get("email")
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+            
+        username = data.get("username")
+        password = data.get("password")
+        email = data.get("email")
 
-    if not username or not password or not email:
-        return jsonify({"success": False, "message": "All fields are required"}), 400
+        if not username or not password or not email:
+            return jsonify({"success": False, "message": "All fields are required"}), 400
 
-    hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+        # Check if user already exists
+        if User.query.filter_by(username=username).first():
+            return jsonify({"success": False, "message": "Username already exists"}), 409
+            
+        if User.query.filter_by(email=email).first():
+            return jsonify({"success": False, "message": "Email already registered"}), 409
 
-    new_user = User(username=username, password=hashed_password, email=email)
-    db.session.add(new_user)
-    db.session.commit()
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
 
-    return jsonify({"success": True, "message": "User registered successfully"})
+        new_user = User(username=username, password=hashed_password, email=email)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({
+            "success": True, 
+            "message": "User registered successfully",
+            "user": {
+                "id": new_user.id,
+                "username": new_user.username,
+                "email": new_user.email
+            }
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "message": "An error occurred during registration",
+            "error": str(e)
+        }), 500
 
 
 @app.route("/api/login", methods=["POST"])
 def login():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
 
-    user = User.query.filter_by(username=username).first()
+        username = data.get("username")
+        password = data.get("password")
 
-    if user and bcrypt.check_password_hash(user.password, password):
+        if not username or not password:
+            return jsonify({"success": False, "message": "Both username and password are required"}), 400
+
+        user = User.query.filter_by(username=username).first()
+
+        if not user:
+            # Don't reveal whether username exists for security
+            return jsonify({"success": False, "message": "Invalid credentials"}), 401
+
+        if not bcrypt.check_password_hash(user.password, password):
+            return jsonify({"success": False, "message": "Invalid credentials"}), 401
+
         session["user_id"] = user.id
+        
         return jsonify({
             "success": True, 
             "message": "Login successful", 
-            "user_id": user.id 
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email
+            }
         })
-    
-    return jsonify({"success": False, "message": "Invalid credentials"}), 401
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "An error occurred during login",
+            "error": str(e)
+        }), 500
 
 
 
