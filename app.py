@@ -72,6 +72,7 @@ def signup():
         return jsonify({
             "success": True, 
             "message": "User registered successfully",
+            "user_id": new_user.id,
             "user": {
                 "id": new_user.id,
                 "username": new_user.username,
